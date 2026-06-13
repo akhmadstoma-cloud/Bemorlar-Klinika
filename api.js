@@ -31,7 +31,7 @@
     return data;
   }
 
-  // ─── Demo / fallback data (to'g'ri field nomlari bilan) ────────────────────
+  // ─── Demo / fallback data ────────────────────────────────────────────────
   let _demoBemorlar = [
     {
       id: 'b1', ism: 'Aliyev Jasur', tel: '+998901234567', yosh: 34,
@@ -72,14 +72,37 @@
   let _demoNextId = 6;
 
   function _calcStats(list) {
-    const total = list.length;
+    const today = new Date().toISOString().slice(0, 10);
+    const jami = list.length;
     const faol = list.filter(b => b.holat === 'Faol').length;
     const davolangan = list.filter(b => b.holat === 'Davolangan').length;
     const kutmoqda = list.filter(b => b.holat === 'Kutmoqda').length;
+    const arxiv = list.filter(b => b.holat === 'Arxiv').length;
+    const qarzdor = list.filter(b => b.tolov_holati === 'Qarz').length;
     const tolangan = list.filter(b => b.tolov_holati === "To'langan").reduce((s, b) => s + (b.tolov_summa || 0), 0);
     const qarz = list.filter(b => b.tolov_holati === 'Qarz').reduce((s, b) => s + (b.tolov_summa || 0), 0);
-    const bugun = list.filter(b => b.yaratilgan === new Date().toISOString().slice(0,10)).length;
-    return { total, faol, davolangan, kutmoqda, tolangan, qarz, bugun };
+    const bugun = list.filter(b => b.yaratilgan === today || (b.tashrif_sana && b.tashrif_sana.startsWith(today))).length;
+
+    // Bo'limlar bo'yicha statistika
+    const bolimMap = {};
+    list.forEach(b => {
+      const bolim = b.bolim || 'Boshqa';
+      bolimMap[bolim] = (bolimMap[bolim] || 0) + 1;
+    });
+    const bolimlar = Object.entries(bolimMap).map(([nom, soni]) => ({ nom, soni }));
+
+    // Oylik trend (oxirgi 6 oy)
+    const trendMap = {};
+    list.forEach(b => {
+      const sana = b.yaratilgan || b.tashrif_sana;
+      if (sana) {
+        const oy = sana.substring(0, 7);
+        trendMap[oy] = (trendMap[oy] || 0) + 1;
+      }
+    });
+    const trend = Object.entries(trendMap).sort().slice(-6).map(([oy, soni]) => ({ oy, soni }));
+
+    return { jami, faol, davolangan, kutmoqda, arxiv, qarzdor, tolangan, qarz, bugun, bolimlar, trend };
   }
 
   // ─── API object ────────────────────────────────────────────────────────────
