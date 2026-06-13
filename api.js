@@ -1,4 +1,6 @@
 // api.js — Google Apps Script bilan muloqot qiluvchi API moduli
+// window.getAPI() funksiyasini eksport qiladi
+
 (function () {
   const BASE_URL = window.__API_URL || '';
 
@@ -18,34 +20,69 @@
     if (!BASE_URL) throw new Error('API URL topilmadi');
     const url = new URL(BASE_URL);
     url.searchParams.set('action', action);
-    const res = await fetch(url.toString(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {})
+    });
     if (!res.ok) throw new Error('Server xatosi: ' + res.status);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     return data;
   }
 
+  // ─── Demo / fallback data (to'g'ri field nomlari bilan) ────────────────────
   let _demoBemorlar = [
-    { id: 'b1', ism: 'Aliyev Jasur', telefon: '+998901234567', tug_sana: '1990-05-15', jinsi: 'Erkak', manzil: 'Toshkent', kasallik: 'Stomatit', holat: 'Faol', izoh: '', yaratilgan: '2024-01-10' },
-    { id: 'b2', ism: 'Karimova Malika', telefon: '+998931112233', tug_sana: '1985-11-22', jinsi: 'Ayol', manzil: 'Samarqand', kasallik: 'Kariyes', holat: 'Davolangan', izoh: '', yaratilgan: '2024-01-15' },
-    { id: 'b3', ism: "O'rinov Dilshod", telefon: '+998901234568', tug_sana: '1978-03-08', jinsi: 'Erkak', manzil: 'Namangan', kasallik: 'Parodontit', holat: 'Faol', izoh: '', yaratilgan: '2024-02-01' },
-    { id: 'b4', ism: 'Toshmatova Zulfiya', telefon: '+998991234567', tug_sana: '1995-07-30', jinsi: 'Ayol', manzil: 'Toshkent', kasallik: 'Ortodontiya', holat: 'Faol', izoh: '', yaratilgan: '2024-02-10' },
-    { id: 'b5', ism: 'Xolmatov Sardor', telefon: '+998711234567', tug_sana: '2000-12-01', jinsi: 'Erkak', manzil: 'Andijon', kasallik: 'Protez', holat: 'Kutmoqda', izoh: '', yaratilgan: '2024-03-05' },
+    {
+      id: 'b1', ism: 'Aliyev Jasur', tel: '+998901234567', yosh: 34,
+      manzil: 'Toshkent, Yunusobod', klinika: 'AkhmadStoma — Yunusobod',
+      bolim: 'Terapiya', tashrif_sana: '2024-01-10 09:00', keyingi_tashrif: '2024-02-10 09:00',
+      rentgen_url: '', tolov_summa: 350000, tolov_holati: "To'langan",
+      izoh: 'Doimiy bemor', holat: 'Faol', yaratilgan: '2024-01-10'
+    },
+    {
+      id: 'b2', ism: 'Karimova Malika', tel: '+998931112233', yosh: 39,
+      manzil: 'Samarqand', klinika: 'AkhmadStoma — Yunusobod',
+      bolim: 'Ortodontiya', tashrif_sana: '2024-01-15 11:00', keyingi_tashrif: '',
+      rentgen_url: '', tolov_summa: 500000, tolov_holati: "To'langan",
+      izoh: '', holat: 'Davolangan', yaratilgan: '2024-01-15'
+    },
+    {
+      id: 'b3', ism: "O'rinov Dilshod", tel: '+998901234568', yosh: 46,
+      manzil: 'Namangan', klinika: 'AkhmadStoma — Yunusobod',
+      bolim: 'Xirurgiya', tashrif_sana: '2024-02-01 10:00', keyingi_tashrif: '2024-03-01 10:00',
+      rentgen_url: '', tolov_summa: 200000, tolov_holati: 'Qarz',
+      izoh: 'Urgench shahridan keldi', holat: 'Faol', yaratilgan: '2024-02-01'
+    },
+    {
+      id: 'b4', ism: 'Toshmatova Zulfiya', tel: '+998991234567', yosh: 29,
+      manzil: 'Toshkent, Chilonzor', klinika: 'AkhmadStoma — Yunusobod',
+      bolim: 'Ortodontiya', tashrif_sana: '2024-02-10 14:00', keyingi_tashrif: '2024-03-10 14:00',
+      rentgen_url: '', tolov_summa: 0, tolov_holati: 'Qarz',
+      izoh: '', holat: 'Faol', yaratilgan: '2024-02-10'
+    },
+    {
+      id: 'b5', ism: 'Xolmatov Sardor', tel: '+998711234567', yosh: 24,
+      manzil: 'Andijon', klinika: 'AkhmadStoma — Yunusobod',
+      bolim: 'Ortopediya', tashrif_sana: '2024-03-05 12:00', keyingi_tashrif: '2024-04-05 12:00',
+      rentgen_url: '', tolov_summa: 150000, tolov_holati: 'Qisman',
+      izoh: 'Protez uchun', holat: 'Kutmoqda', yaratilgan: '2024-03-05'
+    },
   ];
   let _demoNextId = 6;
 
   function _calcStats(list) {
-    return {
-      total: list.length,
-      faol: list.filter(b => b.holat === 'Faol').length,
-      davolangan: list.filter(b => b.holat === 'Davolangan').length,
-      kutmoqda: list.filter(b => b.holat === 'Kutmoqda').length,
-      erkak: list.filter(b => b.jinsi === 'Erkak').length,
-      ayol: list.filter(b => b.jinsi === 'Ayol').length,
-      bugungi: 0,
-    };
+    const total = list.length;
+    const faol = list.filter(b => b.holat === 'Faol').length;
+    const davolangan = list.filter(b => b.holat === 'Davolangan').length;
+    const kutmoqda = list.filter(b => b.holat === 'Kutmoqda').length;
+    const tolangan = list.filter(b => b.tolov_holati === "To'langan").reduce((s, b) => s + (b.tolov_summa || 0), 0);
+    const qarz = list.filter(b => b.tolov_holati === 'Qarz').reduce((s, b) => s + (b.tolov_summa || 0), 0);
+    const bugun = list.filter(b => b.yaratilgan === new Date().toISOString().slice(0,10)).length;
+    return { total, faol, davolangan, kutmoqda, tolangan, qarz, bugun };
   }
 
+  // ─── API object ────────────────────────────────────────────────────────────
   function createAPI() {
     let _useDemo = false;
     let _checked = false;
@@ -58,24 +95,31 @@
         const r = await fetch(BASE_URL + '?action=ping', { signal: AbortSignal.timeout(5000) });
         if (!r.ok) _useDemo = true;
       } catch { _useDemo = true; }
-      if (_useDemo && window.__showToast) window.__showToast("Demo rejim: server ulanmadi", 'info');
+      if (_useDemo && window.__showToast) {
+        window.__showToast("Demo rejim: ma'lumotlar qurilmada saqlanmoqda", 'info');
+      }
     }
 
     return {
       async getBemorlar() {
         await _checkServer();
-        if (_useDemo) return [..._demoBemorlar];
-        try { const d = await request('getBemorlar'); return d.data || d || []; }
-        catch { _useDemo = true; return [..._demoBemorlar]; }
+        if (_useDemo) return JSON.parse(JSON.stringify(_demoBemorlar));
+        try {
+          const d = await request('getBemorlar');
+          return d.data || d || [];
+        } catch { _useDemo = true; return JSON.parse(JSON.stringify(_demoBemorlar)); }
       },
       async addBemor(bemor) {
         await _checkServer();
         if (_useDemo) {
           const nb = { ...bemor, id: 'b' + _demoNextId++, yaratilgan: new Date().toISOString().slice(0,10) };
-          _demoBemorlar.unshift(nb); return nb;
+          _demoBemorlar.unshift(nb);
+          return nb;
         }
-        try { const d = await postRequest('addBemor', bemor); return d.data || d; }
-        catch { throw new Error('Saqlashda xato'); }
+        try {
+          const d = await postRequest('addBemor', bemor);
+          return d.data || d;
+        } catch { throw new Error('Saqlashda xato'); }
       },
       async updateBemor(id, bemor) {
         await _checkServer();
@@ -84,20 +128,27 @@
           if (idx >= 0) { _demoBemorlar[idx] = { ..._demoBemorlar[idx], ...bemor }; return _demoBemorlar[idx]; }
           throw new Error('Bemor topilmadi');
         }
-        try { const d = await postRequest('updateBemor', { id, ...bemor }); return d.data || d; }
-        catch { throw new Error('Yangilashda xato'); }
+        try {
+          const d = await postRequest('updateBemor', { id, ...bemor });
+          return d.data || d;
+        } catch { throw new Error('Yangilashda xato'); }
       },
       async deleteBemor(id) {
         await _checkServer();
-        if (_useDemo) { _demoBemorlar = _demoBemorlar.filter(b => b.id !== id); return { ok: true }; }
+        if (_useDemo) {
+          _demoBemorlar = _demoBemorlar.filter(b => b.id !== id);
+          return { ok: true };
+        }
         try { return await request('deleteBemor', { id }); }
         catch { throw new Error("O'chirishda xato"); }
       },
       async getStats() {
         await _checkServer();
         if (_useDemo) return _calcStats(_demoBemorlar);
-        try { const d = await request('getStats'); return d.data || d; }
-        catch { return _calcStats(_demoBemorlar); }
+        try {
+          const d = await request('getStats');
+          return d.data || d;
+        } catch { return _calcStats(_demoBemorlar); }
       },
     };
   }
