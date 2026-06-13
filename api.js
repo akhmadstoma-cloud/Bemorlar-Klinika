@@ -1,6 +1,4 @@
 // api.js — Google Apps Script bilan muloqot qiluvchi API moduli
-// window.getAPI() funksiyasini eksport qiladi
-
 (function () {
   const BASE_URL = window.__API_URL || '';
 
@@ -31,43 +29,12 @@
     return data;
   }
 
-  // ─── Demo / fallback data ────────────────────────────────────────────────
   let _demoBemorlar = [
-    {
-      id: 'b1', ism: 'Aliyev Jasur', tel: '+998901234567', yosh: 34,
-      manzil: 'Toshkent, Yunusobod', klinika: 'AkhmadStoma — Yunusobod',
-      bolim: 'Terapiya', tashrif_sana: '2024-01-10 09:00', keyingi_tashrif: '2024-02-10 09:00',
-      rentgen_url: '', tolov_summa: 350000, tolov_holati: "To'langan",
-      izoh: 'Doimiy bemor', holat: 'Faol', yaratilgan: '2024-01-10'
-    },
-    {
-      id: 'b2', ism: 'Karimova Malika', tel: '+998931112233', yosh: 39,
-      manzil: 'Samarqand', klinika: 'AkhmadStoma — Yunusobod',
-      bolim: 'Ortodontiya', tashrif_sana: '2024-01-15 11:00', keyingi_tashrif: '',
-      rentgen_url: '', tolov_summa: 500000, tolov_holati: "To'langan",
-      izoh: '', holat: 'Davolangan', yaratilgan: '2024-01-15'
-    },
-    {
-      id: 'b3', ism: "O'rinov Dilshod", tel: '+998901234568', yosh: 46,
-      manzil: 'Namangan', klinika: 'AkhmadStoma — Yunusobod',
-      bolim: 'Xirurgiya', tashrif_sana: '2024-02-01 10:00', keyingi_tashrif: '2024-03-01 10:00',
-      rentgen_url: '', tolov_summa: 200000, tolov_holati: 'Qarz',
-      izoh: 'Urgench shahridan keldi', holat: 'Faol', yaratilgan: '2024-02-01'
-    },
-    {
-      id: 'b4', ism: 'Toshmatova Zulfiya', tel: '+998991234567', yosh: 29,
-      manzil: 'Toshkent, Chilonzor', klinika: 'AkhmadStoma — Yunusobod',
-      bolim: 'Ortodontiya', tashrif_sana: '2024-02-10 14:00', keyingi_tashrif: '2024-03-10 14:00',
-      rentgen_url: '', tolov_summa: 0, tolov_holati: 'Qarz',
-      izoh: '', holat: 'Faol', yaratilgan: '2024-02-10'
-    },
-    {
-      id: 'b5', ism: 'Xolmatov Sardor', tel: '+998711234567', yosh: 24,
-      manzil: 'Andijon', klinika: 'AkhmadStoma — Yunusobod',
-      bolim: 'Ortopediya', tashrif_sana: '2024-03-05 12:00', keyingi_tashrif: '2024-04-05 12:00',
-      rentgen_url: '', tolov_summa: 150000, tolov_holati: 'Qisman',
-      izoh: 'Protez uchun', holat: 'Kutmoqda', yaratilgan: '2024-03-05'
-    },
+    { id:'b1', ism:'Aliyev Jasur', tel:'+998901234567', yosh:34, manzil:'Toshkent, Yunusobod', klinika:'AkhmadStoma — Yunusobod', bolim:'Terapiya', tashrif_sana:'2024-01-10 09:00', keyingi_tashrif:'2024-02-10 09:00', rentgen_url:'', tolov_summa:350000, tolov_holati:"To'langan", izoh:'Doimiy bemor', holat:'Faol', yaratilgan:'2024-01-10' },
+    { id:'b2', ism:'Karimova Malika', tel:'+998931112233', yosh:39, manzil:'Samarqand', klinika:'AkhmadStoma — Yunusobod', bolim:'Ortodontiya', tashrif_sana:'2024-01-15 11:00', keyingi_tashrif:'', rentgen_url:'', tolov_summa:500000, tolov_holati:"To'langan", izoh:'', holat:'Davolangan', yaratilgan:'2024-01-15' },
+    { id:'b3', ism:"O'rinov Dilshod", tel:'+998901234568', yosh:46, manzil:'Namangan', klinika:'AkhmadStoma — Yunusobod', bolim:'Xirurgiya', tashrif_sana:'2024-02-01 10:00', keyingi_tashrif:'2024-03-01 10:00', rentgen_url:'', tolov_summa:200000, tolov_holati:'Qarz', izoh:'', holat:'Faol', yaratilgan:'2024-02-01' },
+    { id:'b4', ism:'Toshmatova Zulfiya', tel:'+998991234567', yosh:29, manzil:'Toshkent, Chilonzor', klinika:'AkhmadStoma — Yunusobod', bolim:'Ortodontiya', tashrif_sana:'2024-02-10 14:00', keyingi_tashrif:'2024-03-10 14:00', rentgen_url:'', tolov_summa:0, tolov_holati:'Qarz', izoh:'', holat:'Faol', yaratilgan:'2024-02-10' },
+    { id:'b5', ism:'Xolmatov Sardor', tel:'+998711234567', yosh:24, manzil:'Andijon', klinika:'AkhmadStoma — Yunusobod', bolim:'Ortopediya', tashrif_sana:'2024-03-05 12:00', keyingi_tashrif:'2024-04-05 12:00', rentgen_url:'', tolov_summa:150000, tolov_holati:'Qisman', izoh:'', holat:'Kutmoqda', yaratilgan:'2024-03-05' },
   ];
   let _demoNextId = 6;
 
@@ -82,67 +49,51 @@
     const tolangan = list.filter(b => b.tolov_holati === "To'langan").reduce((s, b) => s + (b.tolov_summa || 0), 0);
     const qarz = list.filter(b => b.tolov_holati === 'Qarz').reduce((s, b) => s + (b.tolov_summa || 0), 0);
     const bugun = list.filter(b => b.yaratilgan === today || (b.tashrif_sana && b.tashrif_sana.startsWith(today))).length;
-
-    // Bo'limlar bo'yicha statistika
     const bolimMap = {};
-    list.forEach(b => {
-      const bolim = b.bolim || 'Boshqa';
-      bolimMap[bolim] = (bolimMap[bolim] || 0) + 1;
-    });
+    list.forEach(b => { const bolim = b.bolim || 'Boshqa'; bolimMap[bolim] = (bolimMap[bolim] || 0) + 1; });
     const bolimlar = Object.entries(bolimMap).map(([nom, soni]) => ({ nom, soni }));
-
-    // Oylik trend (oxirgi 6 oy)
     const trendMap = {};
-    list.forEach(b => {
-      const sana = b.yaratilgan || b.tashrif_sana;
-      if (sana) {
-        const oy = sana.substring(0, 7);
-        trendMap[oy] = (trendMap[oy] || 0) + 1;
-      }
-    });
+    list.forEach(b => { const sana = b.yaratilgan || b.tashrif_sana; if (sana) { const oy = sana.substring(0, 7); trendMap[oy] = (trendMap[oy] || 0) + 1; } });
     const trend = Object.entries(trendMap).sort().slice(-6).map(([oy, soni]) => ({ oy, soni }));
-
     return { jami, faol, davolangan, kutmoqda, arxiv, qarzdor, tolangan, qarz, bugun, bolimlar, trend };
   }
 
-  // ─── API object ────────────────────────────────────────────────────────────
   function createAPI() {
     let _useDemo = false;
-    let _checked = false;
+    let _checkPromise = null;  // parallel-safe
 
-    async function _checkServer() {
-      if (_checked) return;
-      _checked = true;
-      if (!BASE_URL) { _useDemo = true; return; }
-      try {
-        const r = await fetch(BASE_URL + '?action=ping', { signal: AbortSignal.timeout(5000) });
-        if (!r.ok) _useDemo = true;
-      } catch { _useDemo = true; }
-      if (_useDemo && window.__showToast) {
-        window.__showToast("Demo rejim: ma'lumotlar qurilmada saqlanmoqda", 'info');
-      }
+    function _checkServer() {
+      if (_checkPromise) return _checkPromise;
+      _checkPromise = (async () => {
+        if (!BASE_URL) { _useDemo = true; return; }
+        try {
+          const r = await fetch(BASE_URL + '?action=ping', { signal: AbortSignal.timeout(3000) });
+          if (!r.ok) _useDemo = true;
+          else {
+            const txt = await r.text();
+            if (!txt || txt.includes('error') || txt.includes('Error')) _useDemo = true;
+          }
+        } catch { _useDemo = true; }
+        if (_useDemo && window.__showToast) window.__showToast("Demo rejim: ma'lumotlar qurilmada saqlanmoqda", 'info');
+      })();
+      return _checkPromise;
     }
 
     return {
       async getBemorlar() {
         await _checkServer();
         if (_useDemo) return JSON.parse(JSON.stringify(_demoBemorlar));
-        try {
-          const d = await request('getBemorlar');
-          return d.data || d || [];
-        } catch { _useDemo = true; return JSON.parse(JSON.stringify(_demoBemorlar)); }
+        try { const d = await request('getBemorlar'); return d.data || d || []; }
+        catch { _useDemo = true; return JSON.parse(JSON.stringify(_demoBemorlar)); }
       },
       async addBemor(bemor) {
         await _checkServer();
         if (_useDemo) {
           const nb = { ...bemor, id: 'b' + _demoNextId++, yaratilgan: new Date().toISOString().slice(0,10) };
-          _demoBemorlar.unshift(nb);
-          return nb;
+          _demoBemorlar.unshift(nb); return nb;
         }
-        try {
-          const d = await postRequest('addBemor', bemor);
-          return d.data || d;
-        } catch { throw new Error('Saqlashda xato'); }
+        try { const d = await postRequest('addBemor', bemor); return d.data || d; }
+        catch { throw new Error('Saqlashda xato'); }
       },
       async updateBemor(id, bemor) {
         await _checkServer();
@@ -151,27 +102,20 @@
           if (idx >= 0) { _demoBemorlar[idx] = { ..._demoBemorlar[idx], ...bemor }; return _demoBemorlar[idx]; }
           throw new Error('Bemor topilmadi');
         }
-        try {
-          const d = await postRequest('updateBemor', { id, ...bemor });
-          return d.data || d;
-        } catch { throw new Error('Yangilashda xato'); }
+        try { const d = await postRequest('updateBemor', { id, ...bemor }); return d.data || d; }
+        catch { throw new Error('Yangilashda xato'); }
       },
       async deleteBemor(id) {
         await _checkServer();
-        if (_useDemo) {
-          _demoBemorlar = _demoBemorlar.filter(b => b.id !== id);
-          return { ok: true };
-        }
+        if (_useDemo) { _demoBemorlar = _demoBemorlar.filter(b => b.id !== id); return { ok: true }; }
         try { return await request('deleteBemor', { id }); }
         catch { throw new Error("O'chirishda xato"); }
       },
       async getStats() {
         await _checkServer();
         if (_useDemo) return _calcStats(_demoBemorlar);
-        try {
-          const d = await request('getStats');
-          return d.data || d;
-        } catch { return _calcStats(_demoBemorlar); }
+        try { const d = await request('getStats'); return d.data || d; }
+        catch { return _calcStats(_demoBemorlar); }
       },
     };
   }
