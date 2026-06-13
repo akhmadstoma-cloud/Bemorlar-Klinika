@@ -5,7 +5,7 @@
 </script>
 
 <meta charset="utf-8" />
-<title>Bemorlar â Klinika tizimi</title>
+<title>Bemorlar → Klinika tizimi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -150,9 +150,9 @@
   </svg>
 </template>
 
-<!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-     CONFIG â API URL va parol
-     âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+<!-- →→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→
+     CONFIG → API URL va parol
+     →→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→→ -->
 <script>
   // Sizning Apps Script Web App URL'ingiz
   window.__API_URL = 'https://script.google.com/macros/s/AKfycbz8zGWQyV2iKoBUqGbcezSQGtQKcQeW_NQG3iXkvPUad2x975UcMONV7zlTcuN5H8jEKA/exec';
@@ -191,7 +191,7 @@ const LoginPage = ({ onLogin }) => {
     setError('');
     setLoading(true);
     try {
-      // Client-side password check â server hali deploy qilinmagan bo'lsa ham ishlaydi
+      // Client-side password check → server hali deploy qilinmagan bo'lsa ham ishlaydi
       if (pwd !== window.__PASSWORD) {
         setError('Parol noto\'g\'ri. Qaytadan urinib ko\'ring.');
         setLoading(false);
@@ -209,7 +209,7 @@ const LoginPage = ({ onLogin }) => {
       <form className="login-card" onSubmit={submit}>
         <div className="login-logo">B</div>
         <h1 className="login-title">Bemorlar</h1>
-        <div className="login-sub">Klinika tizimi Â· kirish uchun parolni kiriting</div>
+        <div className="login-sub">Klinika tizimi · kirish uchun parolni kiriting</div>
 
         <label className="login-label">Parol</label>
         <div className="login-input-wrap">
@@ -218,21 +218,21 @@ const LoginPage = ({ onLogin }) => {
             ref={inputRef}
             type="password"
             className="login-input"
-            placeholder="â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢"
+            placeholder="→¢→¢→¢→¢→¢→¢→¢→¢→¢→¢"
             value={pwd}
             onChange={e => setPwd(e.target.value)}
             autoComplete="current-password"
           />
         </div>
 
-        {error && <div className="login-error">â  {error}</div>}
+        {error && <div className="login-error">→  {error}</div>}
 
         <button type="submit" className="login-btn" disabled={loading || !pwd}>
-          {loading ? 'Tekshirilmoqda...' : 'Kirish â'}
+          {loading ? 'Tekshirilmoqda...' : 'Kirish →'}
         </button>
 
         <div className="login-footer">
-          Bemorlar v2.0 Â· Premium
+          Bemorlar v2.0 · Premium
         </div>
       </form>
     </div>
@@ -266,7 +266,7 @@ const MainApp = ({ onLogout, showToast }) => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  // Cmd+K to focus search â handled via PageHeader
+  // Cmd+K to focus search → handled via PageHeader
   useEffect(() => {
     const h = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -282,14 +282,14 @@ const MainApp = ({ onLogout, showToast }) => {
   const handleNav = (id) => {
     if (['terapiya', 'xirurgiya', 'ortodontiya', 'ortopediya'].includes(id)) {
       setPage('bemorlar');
-      // Could filter by dept â skipping for now
+      // Could filter by dept → skipping for now
       return;
     }
     setPage(id);
   };
   const handleSelect = (id) => setSelectedId(id);
   const handleFormSave = async (saved) => {
-    showToast(`â "${saved.ism}" muvaffaqiyatli saqlandi`, 'success');
+    showToast(`→ "${saved.ism}" muvaffaqiyatli saqlandi`, 'success');
     await refresh();
     setPage('bemorlar');
     setSelectedId(saved.id);
@@ -299,7 +299,7 @@ const MainApp = ({ onLogout, showToast }) => {
     setEditing(bemor);
   };
   const handleEditSave = async (saved) => {
-    showToast(`â "${saved.ism}" yangilandi`, 'success');
+    showToast(`→ "${saved.ism}" yangilandi`, 'success');
     await refresh();
     setEditing(null);
     setSelectedId(saved.id);
@@ -312,7 +312,7 @@ const MainApp = ({ onLogout, showToast }) => {
     if (!deleting) return;
     try {
       await api.deleteBemor(deleting.id);
-      showToast(`â "${deleting.ism}" o'chirildi`, 'success');
+      showToast(`→ "${deleting.ism}" o'chirildi`, 'success');
       setDeleting(null);
       await refresh();
     } catch (err) {
