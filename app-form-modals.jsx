@@ -79,8 +79,14 @@ window.FormPage = ({ onCancel, onSave, initial = null, mode = "create" }) => {
     setSaving(true);
     try {
       let payload = { ...data, yosh: Number(data.yosh) || 0, tolov_summa: Number(String(data.tolov_summa).replace(/\s/g, "")) || 0 };
-      if (rentgenFile && window.__API_URL) {
-        try { const u = await window.BemorAPI.uploadRentgen(rentgenFile); payload.rentgen_url = u.url; } catch {}
+      if (rentgenFile && window.BemorAPI) {
+        try {
+          setSaving('Rentgen yuklanmoqda...');
+          const u = await window.BemorAPI.uploadRentgen(rentgenFile);
+          payload.rentgen_url = u.url;
+        } catch (re) {
+          if (window.__showToast) window.__showToast('Rentgen yuklanmadi: ' + (re.message || re), 'error');
+        }
       }
       const api = window.getAPI();
       const saved = mode === "edit" ? await api.updateBemor(data.id, payload) : await api.addBemor(payload);
