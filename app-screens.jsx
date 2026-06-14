@@ -21,7 +21,7 @@ window.AppSidebar = ({ active, onNav, onLogout }) => {
   ];
   const groups = [...new Set(items.map(i => i.group))];
   return (
-    <aside data-app-sidebar style={{ width: 232, flexShrink: 0, background: t.bg, borderRight: `1px solid ${t.line}`, padding: "24px 14px", display: "flex", flexDirection: "column", fontFamily: t.fonts.sans, height: "100vh" }}>
+    <aside data-app-sidebar style={{ width: window.innerWidth < 768 ? 0 : 232, flexShrink: 0, background: t.bg, borderRight: `1px solid ${t.line}`, padding: "24px 14px", display: window.innerWidth < 768 ? "none" : "flex", flexDirection: "column", fontFamily: t.fonts.sans, height: "100vh", overflowX: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "0 10px 26px" }}>
         <div style={{ width: 34, height: 34, borderRadius: 9, background: `linear-gradient(140deg, ${t.gold}, ${t.goldDim})`, display: "grid", placeItems: "center", color: t.theme === "dark" ? t.bg : "#fff", fontSize: 16, fontWeight: 700, letterSpacing: "-0.03em", flexShrink: 0 }}>B</div>
         <div data-sidebar-text style={{ flex: 1, minWidth: 0 }}>
