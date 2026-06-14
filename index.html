@@ -5,7 +5,7 @@
 </script>
 
 <meta charset="utf-8" />
-<title>Bemorlar → Klinika tizimi</title>
+<title>Bemorlar 🏥 Klinika tizimi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -128,6 +128,10 @@
   body[data-theme="light"] .login-footer { border-color: rgba(0,0,0,0.06); color: #8a847b; }
 
   /* Print */
+  @media (max-width: 768px) {
+    [data-app-sidebar] { display: none !important; }
+    [data-app-sidebar-overlay] { display: block !important; }
+  }
   @media print {
     body * { visibility: hidden; }
     .print-area, .print-area * { visibility: visible; }
@@ -218,7 +222,7 @@ const LoginPage = ({ onLogin }) => {
             ref={inputRef}
             type="password"
             className="login-input"
-            placeholder="→¢→¢→¢→¢→¢→¢→¢→¢→¢→¢"
+            placeholder="••••••••••"
             value={pwd}
             onChange={e => setPwd(e.target.value)}
             autoComplete="current-password"
@@ -228,7 +232,7 @@ const LoginPage = ({ onLogin }) => {
         {error && <div className="login-error">→  {error}</div>}
 
         <button type="submit" className="login-btn" disabled={loading || !pwd}>
-          {loading ? 'Tekshirilmoqda...' : 'Kirish →'}
+          {loading ? 'Tekshirilmoqda...' : 'Kirish →'}
         </button>
 
         <div className="login-footer">
