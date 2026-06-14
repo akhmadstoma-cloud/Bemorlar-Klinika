@@ -5,6 +5,32 @@ const { useState: uS2, useEffect: uE2, useMemo: uM2, useRef: uR2 } = React;
 // ═══════════════════════════════════════════════════════════
 // 4-STEP FORM (Add new patient)
 // ═══════════════════════════════════════════════════════════
+// ─── Field & Select defined OUTSIDE FormPage to prevent focus loss on re-render ───
+const _Field = ({ label, k, type = "text", placeholder, hint, required, icon, t, I, data, set, inputStyle }) => (
+  <div style={{ marginBottom: 14 }}>
+    <label style={{ fontSize: 11.5, fontWeight: 500, color: t.inkDim, letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+      {icon && <I shape={icon} size={11} color={t.inkMute} />}
+      {label}{required && <span style={{ color: t.gold }}>*</span>}
+    </label>
+    <input type={type} value={data[k] || ""} onChange={e => set(k, e.target.value)} placeholder={placeholder} style={inputStyle}
+      onFocus={e => { e.target.style.borderColor = t.gold; }}
+      onBlur={e => { e.target.style.borderColor = t.line; }} />
+    {hint && <div style={{ fontSize: 11, color: t.inkMute, marginTop: 4 }}>{hint}</div>}
+  </div>
+);
+
+const _Select = ({ label, k, options, required, icon, t, I, data, set, inputStyle }) => (
+  <div style={{ marginBottom: 14 }}>
+    <label style={{ fontSize: 11.5, fontWeight: 500, color: t.inkDim, letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+      {icon && <I shape={icon} size={11} color={t.inkMute} />}
+      {label}{required && <span style={{ color: t.gold }}>*</span>}
+    </label>
+    <select value={data[k] || ""} onChange={e => set(k, e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+      {options.map(o => <option key={o} value={o}>{o}</option>)}
+    </select>
+  </div>
+);
+
 window.FormPage = ({ onCancel, onSave, initial = null, mode = "create" }) => {
   const t = window.useT();
   const I = window.PremiumIcon;
@@ -68,31 +94,6 @@ window.FormPage = ({ onCancel, onSave, initial = null, mode = "create" }) => {
     borderRadius: 8, fontSize: 13.5, color: t.ink, fontFamily: t.fonts.sans, outline: "none",
   };
 
-  const Field = ({ label, k, type = "text", placeholder, hint, required, icon }) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ fontSize: 11.5, fontWeight: 500, color: t.inkDim, letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        {icon && <I shape={icon} size={11} color={t.inkMute} />}
-        {label}{required && <span style={{ color: t.gold }}>*</span>}
-      </label>
-      <input type={type} value={data[k] || ""} onChange={e => set(k, e.target.value)} placeholder={placeholder} style={inputStyle}
-        onFocus={e => { e.target.style.borderColor = t.gold; }}
-        onBlur={e => { e.target.style.borderColor = t.line; }} />
-      {hint && <div style={{ fontSize: 11, color: t.inkMute, marginTop: 4 }}>{hint}</div>}
-    </div>
-  );
-
-  const Select = ({ label, k, options, required, icon }) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ fontSize: 11.5, fontWeight: 500, color: t.inkDim, letterSpacing: "0.02em", display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        {icon && <I shape={icon} size={11} color={t.inkMute} />}
-        {label}{required && <span style={{ color: t.gold }}>*</span>}
-      </label>
-      <select value={data[k] || ""} onChange={e => set(k, e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
-    </div>
-  );
-
   return (
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", background: t.bg, fontFamily: t.fonts.sans }}>
       {/* Header */}
@@ -146,11 +147,11 @@ window.FormPage = ({ onCancel, onSave, initial = null, mode = "create" }) => {
                 <h3 style={{ margin: "0 0 6px", fontSize: 17, fontWeight: 600, color: t.ink }}>01 · Bemor haqida</h3>
                 <div style={{ fontSize: 13, color: t.inkMute, marginBottom: 22 }}>Asosiy shaxsiy ma'lumotlar</div>
                 <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1.5fr", gap: 14 }}>
-                  <Field label="Ism familiyasi" k="ism" placeholder="Karimov Akmal" required icon="users" />
-                  <Field label="Yoshi" k="yosh" type="number" placeholder="34" required icon="calendar" />
-                  <Field label="Telefoni" k="tel" placeholder="+998 90 123 45 67" required icon="phone" />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Ism familiyasi" k="ism" placeholder="Karimov Akmal" required icon="users" />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Yoshi" k="yosh" type="number" placeholder="34" required icon="calendar" />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Telefoni" k="tel" placeholder="+998 90 123 45 67" required icon="phone" />
                 </div>
-                <Field label="Manzili" k="manzil" placeholder="Toshkent, Yunusobod, Amir Temur 17-12" icon="pin" />
+                <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Manzili" k="manzil" placeholder="Toshkent, Yunusobod, Amir Temur 17-12" icon="pin" />
               </>
             )}
             {step === 2 && (
@@ -158,10 +159,10 @@ window.FormPage = ({ onCancel, onSave, initial = null, mode = "create" }) => {
                 <h3 style={{ margin: "0 0 6px", fontSize: 17, fontWeight: 600, color: t.ink }}>02 · Tashrif tafsilotlari</h3>
                 <div style={{ fontSize: 13, color: t.inkMute, marginBottom: 22 }}>Qaysi klinika, qaysi bo'lim, qachon</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                  <Field label="Klinika" k="klinika" required icon="hexagon" />
-                  <Select label="Bo'limi" k="bolim" required icon="circle" options={["Terapiya", "Xirurgiya", "Ortodontiya", "Ortopediya"]} />
-                  <Field label="Tashrif sanasi" k="tashrif_sana" placeholder="2026-05-20 10:30" required icon="calendar" />
-                  <Field label="Keyingi tashrif" k="keyingi_tashrif" placeholder="2026-06-03 11:00" hint="Bo'sh qoldirsa eslatma yuborilmaydi" icon="calendar" />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Klinika" k="klinika" required icon="hexagon" />
+                  <_Select t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Bo'limi" k="bolim" required icon="circle" options={["Terapiya", "Xirurgiya", "Ortodontiya", "Ortopediya"]} />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Tashrif sanasi" k="tashrif_sana" placeholder="2026-05-20 10:30" required icon="calendar" />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="Keyingi tashrif" k="keyingi_tashrif" placeholder="2026-06-03 11:00" hint="Bo'sh qoldirsa eslatma yuborilmaydi" icon="calendar" />
                 </div>
               </>
             )}
@@ -191,7 +192,7 @@ window.FormPage = ({ onCancel, onSave, initial = null, mode = "create" }) => {
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                  <Field label="To'lov summasi (so'm)" k="tolov_summa" type="number" placeholder="350000" required icon="wallet" />
+                  <_Field t={t} I={I} data={data} set={set} inputStyle={inputStyle} label="To'lov summasi (so'm)" k="tolov_summa" type="number" placeholder="350000" required icon="wallet" />
                   <div style={{ marginBottom: 14 }}>
                     <label style={{ fontSize: 11.5, fontWeight: 500, color: t.inkDim, marginBottom: 6, display: "block" }}>To'lov holati</label>
                     <div style={{ display: "flex", gap: 6 }}>
