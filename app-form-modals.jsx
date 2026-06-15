@@ -318,8 +318,24 @@ window.KartaModal = ({ bemor, onClose, onEdit, onDelete, onPrint }) => {
               } />
               <Row icon="calendar" label="Tashrif sanasi" value={bemor.tashrif_sana} />
               <Row icon="camera" label="Rentgen" value={
-                bemor.rentgen_url ? <a href={bemor.rentgen_url} target="_blank" style={{ color: t.gold, textDecoration: "underline" }}>Rentgen rasmni ko'rish</a> :
-                <span style={{ color: t.inkMute }}>Rentgen yuklanmagan</span>
+                bemor.rentgen_url ? (
+                  <div style={{ marginTop: '8px', borderRadius: '12px', overflow: 'hidden', border: `1px solid ${t.line}`, background: '#000' }}>
+                    <img 
+                      src={bemor.rentgen_url} 
+                      alt="Rentgen" 
+                      style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '300px', objectFit: 'contain' }} 
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                    <div style={{ display: 'none', padding: '15px', textAlign: 'center', color: t.inkMute, fontSize: '12px' }}>
+                      Rasm yuklanmadi. <a href={bemor.rentgen_url} target="_blank" rel="noreferrer" style={{ color: t.gold, textDecoration: 'underline' }}>Havolada ko'ring</a>
+                    </div>
+                  </div>
+                ) : (
+                  <span style={{ color: t.inkMute }}>Rentgen yuklanmagan</span>
+                )
               } />
               <Row icon="wallet" label="To'lovi" value={
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
