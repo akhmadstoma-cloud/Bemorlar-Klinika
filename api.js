@@ -58,16 +58,17 @@
    }
 
    // ── Server so'rovlari ──────────────────────────────────────
-   async function serverPost(action, body) {
-             if (!BASE_URL) throw new Error('API URL yoq');
-             const url = new URL(BASE_URL);
-             url.searchParams.set('action', action);
-             const res = await fetch(url.toString(), {
-                         method: 'POST',
-                         headers: { 'Content-Type': 'application/json' },
-                         body: JSON.stringify(body || {}),
-                         signal: AbortSignal.timeout(10000)
-             });
+        async function serverPost(action, body) {
+	             if (!BASE_URL) throw new Error('API URL yoq');
+	             const url = new URL(BASE_URL);
+	             // POST so'rovlarida action body ichida bo'lishi kerak
+	             const payload = { ...body, action: action };
+	             const res = await fetch(url.toString(), {
+	                         method: 'POST',
+	                         headers: { 'Content-Type': 'application/json' },
+	                         body: JSON.stringify(payload),
+	                         signal: AbortSignal.timeout(10000)
+	             });
              if (!res.ok) throw new Error('HTTP ' + res.status);
              const data = await res.json();
              if (data && data.error) throw new Error(data.error);
@@ -102,12 +103,11 @@
                                                        var mimeType = file.type || 'image/jpeg';
                                                        var fileName = file.name || ('rentgen_' + Date.now() + '.jpg');
                                                        var uploadUrl = new URL(BASE_URL);
-                                                       uploadUrl.searchParams.set('action', 'uploadRentgen');
-                                                       fetch(uploadUrl.toString(), {
-                                                                         method: 'POST',
-                                                                         headers: { 'Content-Type': 'application/json' },
-                                                                         body: JSON.stringify({ fileName: fileName, mimeType: mimeType, base64: base64 })
-                                                       })
+	                                                       fetch(uploadUrl.toString(), {
+	                                                                         method: 'POST',
+	                                                                         headers: { 'Content-Type': 'application/json' },
+	                                                                         body: JSON.stringify({ action: 'uploadRentgen', fileName: fileName, mimeType: mimeType, base64: base64 })
+	                                                       })
                                                          .then(function (res) {
                                                                              if (!res.ok) throw new Error('HTTP ' + res.status);
                                                                              return res.json();
