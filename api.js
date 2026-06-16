@@ -1,10 +1,19 @@
-// api.js — Bemorlar klinika API moduli (v5 - TUZATILGAN)
-// Ma'lumotlar: Google Sheets (asosiy) + localStorage (kesh)
-// Rentgen suratlari: Google Drive (server orqali)
+// ═══════════════════════════════════════════════════════════════════════
+// api.js — Bemorlar klinika API moduli (v6 - TO'LIQ TUZATILGAN)
+//
+// O'zgarishlar (v5 → v6):
+// ✅ Content-Type: text/plain — CORS preflight muammosini hal qiladi (ENG MUHIM!)
+// ✅ Timeout qo'shildi (har bir so'rovga 30 soniya)
+// ✅ getStats force qiladi — eski cache'dan stats olmaydi
+// ✅ uploadRentgen ga bemorId parametri (ixtiyoriy)
+// ✅ ping() funksiyasi — server ulanishini tekshirish
+// ✅ Yaxshilangan xato xabarlari
+// ═══════════════════════════════════════════════════════════════════════
 
 (function () {
     const BASE_URL = window.__API_URL || '';
     const LS_KEY = 'bemorlar_klinika_v4';
+    const TIMEOUT_MS = 30000;
 
     // ── localStorage ──────────────────────────────────────────
     function lsLoad() {
@@ -33,14 +42,15 @@
         const kutmoqda = list.filter(b => b.holat === 'Kutmoqda').length;
         const arxiv = list.filter(b => b.holat === 'Arxiv').length;
         const qarzdor = list.filter(b => b.tolov_holati === 'Qarz').length;
-        
+
         const tolangan = list.filter(b => b.tolov_holati === "To'langan")
             .reduce((s, b) => s + (Number(b.tolov_summa) || 0), 0);
         const qarz = list.filter(b => b.tolov_holati === 'Qarz')
             .reduce((s, b) => s + (Number(b.tolov_summa) || 0), 0);
-        
+
         const bugun = list.filter(b =>
-            b.yaratilgan === today || (b.tashrif_sana && b.tashrif_sana.startsWith(today))
+            (b.yaratilgan && String(b.yaratilgan).startsWith(today)) ||
+            (b.tashrif_sana && String(b.tashrif_sana).startsWith(today))
         ).length;
 
         const bolimMap = {};
@@ -53,21 +63,32 @@
         const trendMap = {};
         list.forEach(b => {
             const sana = b.yaratilgan || b.tashrif_sana;
-            if (sana) { const oy = sana.substring(0, 7); trendMap[oy] = (trendMap[oy] || 0) + 1; }
+            if (sana) { const oy = String(sana).substring(0, 7); trendMap[oy] = (trendMap[oy] || 0) + 1; }
         });
         const trend = Object.entries(trendMap).sort().slice(-6).map(([oy, soni]) => ({ oy, soni }));
 
         return { jami, faol, davolangan, kutmoqda, arxiv, qarzdor, tolangan, qarz, bugun, bolimlar, trend };
     }
 
+    // ── Fetch with timeout ─────────────────────────────────────
+    function fetchWithTimeout(url, options) {
+        options = options || {};
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
+        return fetch(url, { ...options, signal: controller.signal })
+            .finally(() => clearTimeout(id));
+    }
+
     // ── Server so'rovlari ──────────────────────────────────────
     async function serverPost(action, body) {
-        if (!BASE_URL) throw new Error('API URL yoq');
+        if (!BASE_URL) throw new Error('API URL yo\'q');
         const payload = { ...body, action: action };
-        const res = await fetch(BASE_URL, {
+        // ✅ ENG MUHIM: text/plain — CORS preflight'ni chetlab o'tadi
+        const res = await fetchWithTimeout(BASE_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+            redirect: 'follow'
         });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
@@ -76,42 +97,53 @@
     }
 
     async function serverGet(action, params) {
-        if (!BASE_URL) throw new Error('API URL yoq');
+        if (!BASE_URL) throw new Error('API URL yo\'q');
         const url = new URL(BASE_URL);
         url.searchParams.set('action', action);
         if (params) Object.entries(params).forEach(([k, v]) => {
             if (v != null) url.searchParams.set(k, String(v));
         });
-        const res = await fetch(url.toString());
+        const res = await fetchWithTimeout(url.toString(), { redirect: 'follow' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         if (data && data.error) throw new Error(data.error);
         return data;
     }
 
+    // ── Server ulanishini tekshirish ───────────────────────────
+    async function ping() {
+        try {
+            const res = await serverGet('ping');
+            return res && res.success;
+        } catch { return false; }
+    }
+
     // ── Asosiy API ─────────────────────────────────────────────
     window.BemorAPI = {
-        uploadRentgen: function (file) {
+        uploadRentgen: function (file, bemorId) {
             return new Promise(function (resolve, reject) {
                 if (!file) return reject(new Error('Fayl tanlanmagan'));
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     var base64 = e.target.result.split(',')[1];
-                    serverPost('uploadRentgen', {
+                    var payload = {
                         fileName: file.name,
                         mimeType: file.type,
-                        base64: base64 // Backend 'base64' kutmoqda
-                    }).then(resolve).catch(reject);
+                        base64: base64
+                    };
+                    if (bemorId) payload.bemorId = bemorId;
+                    serverPost('uploadRentgen', payload).then(resolve).catch(reject);
                 };
+                reader.onerror = function () { reject(new Error('Fayl o\'qishda xato')); };
                 reader.readAsDataURL(file);
             });
-        }
+        },
+        ping: ping
     };
 
     function createAPI() {
         return {
             async getBemorlar(forceRefresh = false) {
-                // Agar forceRefresh bo'lsa yoki local bo'sh bo'lsa, serverdan kutamiz
                 const local = lsLoad();
                 if (!forceRefresh && local.length > 0) {
                     // Fon rejimda serverdan yangilab qo'yamiz
@@ -133,19 +165,19 @@
             },
 
             async getStats() {
-                const list = await this.getBemorlar();
+                // ✅ force=true — har doim yangi ma'lumotdan stats
+                const list = await this.getBemorlar(true);
                 return calcStats(list);
             },
 
             async addBemor(bemor) {
                 const nb = { ...bemor, id: genId(), yaratilgan: new Date().toISOString().slice(0, 10) };
-                // 1. Serverga saqlaymiz (kutamiz, chunki qurilmalararo sinxronlik muhim)
                 const res = await serverPost('addBemor', nb);
                 if (res && res.success) {
-                    const list = await this.getBemorlar(true); // Serverdan yangi ro'yxatni olamiz
-                    return nb;
+                    await this.getBemorlar(true);
+                    return { ...nb, id: res.id || nb.id };
                 }
-                throw new Error('Serverga saqlashda xato');
+                throw new Error(res && res.error ? res.error : 'Serverga saqlashda xato');
             },
 
             async updateBemor(id, bemor) {
@@ -154,7 +186,7 @@
                     await this.getBemorlar(true);
                     return { id, ...bemor };
                 }
-                throw new Error('Yangilashda xato');
+                throw new Error(res && res.error ? res.error : 'Yangilashda xato');
             },
 
             async deleteBemor(id) {
@@ -163,7 +195,7 @@
                     await this.getBemorlar(true);
                     return { ok: true };
                 }
-                throw new Error('Ochirishda xato');
+                throw new Error(res && res.error ? res.error : 'O\'chirishda xato');
             }
         };
     }
